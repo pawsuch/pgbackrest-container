@@ -1,10 +1,11 @@
 FROM --platform=aarch64 rockylinux:8.5
 RUN groupadd -r postgres && useradd --no-log-init -r -g postgres postgres &&   \
-    dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-aarch64/pgdg-redhat-repo-latest.noarch.rpm && \
-    dnf -qy module disable postgresql && \
-    dnf install -y pgbackrest --nogpgcheck 
-# No GPG check issue on aarch64
-# https://www.postgresql.org/message-id/CAHsfg4G-NfAUA%3DFn6MuAvsaSg0siAAtgkgOGJ6yf9wJGX8EjEA%40mail.gmail.com
+    yum install --nogpgcheck  -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-aarch64/pgdg-redhat-repo-latest.noarch.rpm && \
+    curl -o /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG https://apt.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG-AARCH64 && \
+    sed -i 's/failovermethod=priority/#failovermethod=priority/g' /etc/yum.repos.d/pgdg-redhat-all.repo && \
+    yum -qy module disable postgresql && \
+    yum install -y pgbackrest --nogpgcheck
+
 USER postgres
 ENTRYPOINT ["pgbackrest"]
 CMD ["help"]
